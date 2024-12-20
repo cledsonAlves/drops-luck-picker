@@ -6,6 +6,7 @@ import { ActivityCard } from "@/components/ActivityCard";
 import { CoffeeCard } from "@/components/CoffeeCard";
 import { MessageBoard } from "@/components/MessageBoard";
 import { PhotoGallery } from "@/components/PhotoGallery";
+import { useQuery } from "@tanstack/react-query";
 
 interface Message {
   id: number;
@@ -15,12 +16,27 @@ interface Message {
   timestamp: Date;
 }
 
+const fetchParticipants = async () => {
+  const response = await fetch(
+    "https://gbrvjrsrb1.execute-api.us-east-1.amazonaws.com/geDropsTech"
+  );
+  if (!response.ok) {
+    throw new Error("Falha ao carregar participantes");
+  }
+  return response.json();
+};
+
 const Index = () => {
   const [participants, setParticipants] = useState<string[]>([]);
   const [winner, setWinner] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [authorName, setAuthorName] = useState("");
+
+  const { data: apiParticipants } = useQuery({
+    queryKey: ["participants"],
+    queryFn: fetchParticipants,
+  });
 
   const handleAddParticipant = (name: string) => {
     if (participants.includes(name)) {
@@ -32,13 +48,18 @@ const Index = () => {
   };
 
   const handleRaffle = () => {
-    if (participants.length < 2) {
+    const allParticipants = [
+      ...participants,
+      ...(apiParticipants?.map((p) => p.name.S) || []),
+    ];
+
+    if (allParticipants.length < 2) {
       toast.error("Adicione pelo menos 2 participantes para realizar o sorteio!");
       return;
     }
     
-    const randomIndex = Math.floor(Math.random() * participants.length);
-    const selectedWinner = participants[randomIndex];
+    const randomIndex = Math.floor(Math.random() * allParticipants.length);
+    const selectedWinner = allParticipants[randomIndex];
     setWinner(selectedWinner);
     toast.success(`${selectedWinner} foi sorteado(a)!`);
   };
