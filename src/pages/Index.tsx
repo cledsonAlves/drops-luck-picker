@@ -9,7 +9,6 @@ import { PhotoGallery } from "@/components/PhotoGallery";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardTab from "@/components/DashboardTab";
 import { MessagesTab } from "@/components/MessagesTab";
-import { fetchOrCreateIssue, updateGithubIssue } from "@/services/github";
 
 interface Message {
   id: number;
@@ -19,18 +18,116 @@ interface Message {
   timestamp: Date;
 }
 
+const GITHUB_ISSUE_URL = "https://api.github.com/repos/cledsonAlves/drops-luck-picker/issues";
+const GITHUB_TOKEN = "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";
+
 const Index = () => {
   const [participants, setParticipants] = useState<string[]>([]);
   const [winner, setWinner] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
-    const loadMessages = async () => {
-      const fetchedMessages = await fetchOrCreateIssue();
-      setMessages(fetchedMessages);
-    };
-    loadMessages();
+    fetchOrCreateIssue();
   }, []);
+
+  const fetchOrCreateIssue = async () => {
+    try {
+      // First try to fetch the existing issue
+      const response = await fetch(`${GITHUB_ISSUE_URL}/1`, {
+        headers: {
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github.v3+json"
+        }
+      });
+
+      if (response.status === 404) {
+        // If issue doesn't exist, create it
+        await createInitialIssue();
+        return;
+      }
+
+      const issue = await response.json();
+      parseAndSetMessages(issue);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      toast.error("Erro ao carregar as mensagens");
+    }
+  };
+
+  const createInitialIssue = async () => {
+    try {
+      const initialBody = "| ID | Autor | Mensagem | Votos |\n|---|---|---|---|\n";
+      const response = await fetch(GITHUB_ISSUE_URL, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: "Mural de Recados",
+          body: initialBody,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create initial issue");
+      }
+
+      const issue = await response.json();
+      parseAndSetMessages(issue);
+    } catch (error) {
+      console.error("Error creating initial issue:", error);
+      toast.error("Erro ao criar o mural de recados");
+    }
+  };
+
+  const parseAndSetMessages = (issue) => {
+    const messageRegex = /\|\s*(\d+)\s*\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|\s*(\d+)\s*\|/g;
+    const matches = [...(issue.body?.matchAll(messageRegex) || [])];
+  
+    const parsedMessages = matches.map((match) => ({
+      id: parseInt(match[1]),
+      author: match[2].trim(),
+      content: match[3].trim(),
+      votes: parseInt(match[4]),
+      timestamp: new Date(),
+    }));
+  
+    setMessages(parsedMessages);
+  };
+  
+
+  const updateGithubIssue = async (newMessages) => {
+    try {
+      const tableHeader = "| ID | Autor | Mensagem | Votos |\n|---|---|---|---|\n";
+      const tableRows = newMessages
+        .map((msg) => `| ${msg.id} | ${msg.author} | ${msg.content} | ${msg.votes} |`)
+        .join("\n");
+  
+      const newBody = tableHeader + tableRows;
+  
+      const response = await fetch(`${GITHUB_ISSUE_URL}/1`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          body: newBody,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to update GitHub issue");
+      }
+    } catch (error) {
+      console.error("Error updating GitHub issue:", error);
+      toast.error("Erro ao salvar a mensagem");
+    }
+  };
+  
 
   const handleAddMessage = (author: string, content: string) => {
     if (!content.trim() || !author.trim()) {
