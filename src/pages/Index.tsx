@@ -9,6 +9,10 @@ import { PhotoGallery } from "@/components/PhotoGallery";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardTab from "@/components/DashboardTab";
 import { MessagesTab } from "@/components/MessagesTab";
+import { WinnersTab } from "@/components/WinnersTab";
+
+const GITHUB_ISSUE_URL = "https://api.github.com/repos/cledsonAlves/drops-luck-picker/issues";
+const ID_TOK = "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";
 
 interface Message {
   id: number;
@@ -18,13 +22,11 @@ interface Message {
   timestamp: Date;
 }
 
-const GITHUB_ISSUE_URL = "https://api.github.com/repos/cledsonAlves/drops-luck-picker/issues";
-const ID_TOK = "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";
-
 const Index = () => {
   const [participants, setParticipants] = useState<string[]>([]);
   const [winner, setWinner] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [selectedPrize, setSelectedPrize] = useState<string>("");
 
   useEffect(() => {
     fetchOrCreateIssue();
@@ -32,7 +34,6 @@ const Index = () => {
 
   const fetchOrCreateIssue = async () => {
     try {
-      // First try to fetch the existing issue
       const response = await fetch(`${GITHUB_ISSUE_URL}/1`, {
         headers: {
           "Authorization": `Bearer ${ID_TOK}`,
@@ -41,7 +42,6 @@ const Index = () => {
       });
 
       if (response.status === 404) {
-        // If issue doesn't exist, create it
         await createInitialIssue();
         return;
       }
@@ -96,7 +96,6 @@ const Index = () => {
   
     setMessages(parsedMessages);
   };
-  
 
   const updateGithubIssue = async (newMessages) => {
     try {
@@ -127,7 +126,38 @@ const Index = () => {
       toast.error("Erro ao salvar a mensagem");
     }
   };
-  
+
+  const updateWinnersIssue = async (newWinner: string, prize: string) => {
+    try {
+      const response = await fetch(`${GITHUB_ISSUE_URL}/2`, {
+        headers: {
+          "Authorization": `Bearer ${ID_TOK}`,
+          "Accept": "application/vnd.github.v3+json"
+        }
+      });
+
+      const issue = await response.json();
+      const currentContent = issue.body || "| Nome | Prêmio | Data |\n|---|---|---|\n";
+      const date = new Date().toLocaleDateString('pt-BR');
+      const newRow = `| ${newWinner} | ${prize} | ${date} |\n`;
+      const newContent = currentContent + newRow;
+
+      await fetch(`${GITHUB_ISSUE_URL}/2`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${ID_TOK}`,
+          "Accept": "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          body: newContent,
+        }),
+      });
+    } catch (error) {
+      console.error("Error updating winners:", error);
+      toast.error("Erro ao salvar o ganhador");
+    }
+  };
 
   const handleAddMessage = (author: string, content: string) => {
     if (!content.trim() || !author.trim()) {
@@ -167,6 +197,11 @@ const Index = () => {
     const randomIndex = Math.floor(Math.random() * participants.length);
     const selectedWinner = participants[randomIndex];
     setWinner(selectedWinner);
+    
+    if (selectedPrize) {
+      updateWinnersIssue(selectedWinner, selectedPrize);
+    }
+    
     toast.success(`${selectedWinner} foi sorteado(a)!`);
   };
 
@@ -195,6 +230,7 @@ const Index = () => {
               <TabsTrigger value="sorteio">Sorteio</TabsTrigger>
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
               <TabsTrigger value="mural">Mural de Recados</TabsTrigger>
+              <TabsTrigger value="ganhadores">Ganhadores</TabsTrigger>
             </TabsList>
             
             <TabsContent value="sorteio">
@@ -227,6 +263,10 @@ const Index = () => {
 
             <TabsContent value="mural">
               <MessagesTab messages={messages} />
+            </TabsContent>
+
+            <TabsContent value="ganhadores">
+              <WinnersTab />
             </TabsContent>
           </Tabs>
         </div>
