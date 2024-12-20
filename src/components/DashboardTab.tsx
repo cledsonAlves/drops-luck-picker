@@ -3,8 +3,13 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recha
 import { Award, TrendingUp } from "lucide-react";
 
 interface Employee {
+  userId: { S: string };
+  apresentacoes: { N: string };
   name: { S: string };
-  presentations?: { N: string };
+  email: { S: string };
+  photoUrl: { S: string };
+  timestamp: { S: string };
+  sorteio: { BOOL: boolean };
 }
 
 const DashboardTab = () => {
@@ -15,8 +20,8 @@ const DashboardTab = () => {
       const data = await response.json();
       return data.map((emp: Employee) => ({
         name: emp.name.S,
-        presentations: parseInt(emp.presentations?.N || "0")
-      })).sort((a: any, b: any) => b.presentations - a.presentations);
+        presentations: parseInt(emp.apresentacoes?.N || "0")
+      })).sort((a, b) => b.presentations - a.presentations);
     }
   });
 
@@ -49,7 +54,7 @@ const DashboardTab = () => {
             Top Apresentadores
           </h3>
           <div className="space-y-4">
-            {employees?.slice(0, 5).map((emp: any, index: number) => (
+            {employees?.slice(0, 5).map((emp, index) => (
               <div key={emp.name} className="flex items-center justify-between p-4 bg-aws-50 rounded-lg">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl font-bold text-aws-600">#{index + 1}</span>
