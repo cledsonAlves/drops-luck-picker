@@ -19,7 +19,7 @@ interface Message {
 }
 
 const GITHUB_ISSUE_URL = "https://api.github.com/repos/cledsonAlves/drops-luck-picker/issues";
-const GITHUB_TOKEN = "";
+const ID_TOK = "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";
 
 const Index = () => {
   const [participants, setParticipants] = useState<string[]>([]);
@@ -35,7 +35,7 @@ const Index = () => {
       // First try to fetch the existing issue
       const response = await fetch(`${GITHUB_ISSUE_URL}/1`, {
         headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Authorization": `Bearer ${ID_TOK}`,
           "Accept": "application/vnd.github.v3+json"
         }
       });
@@ -60,7 +60,7 @@ const Index = () => {
       const response = await fetch(GITHUB_ISSUE_URL, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Authorization": `Bearer ${ID_TOK}`,
           "Accept": "application/vnd.github.v3+json",
           "Content-Type": "application/json",
         },
@@ -110,7 +110,7 @@ const Index = () => {
       const response = await fetch(`${GITHUB_ISSUE_URL}/1`, {
         method: "PATCH",
         headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Authorization": `Bearer ${ID_TOK}`,
           "Accept": "application/vnd.github.v3+json",
           "Content-Type": "application/json",
         },
