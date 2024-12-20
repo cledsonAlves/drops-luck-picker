@@ -32,7 +32,7 @@ export const WinnerDisplay = ({ winner, onRaffle, onReset, disabled }: WinnerDis
       <div className="flex gap-2 justify-center">
         <Button
           onClick={onRaffle}
-          disabled={disabled}
+          disabled={false}
           className="bg-aws-600 hover:bg-aws-700 transition-colors"
         >
           Sortear
