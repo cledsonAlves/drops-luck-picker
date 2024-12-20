@@ -8,13 +8,12 @@ import { MessageBoard } from "@/components/MessageBoard";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardTab from "@/components/DashboardTab";
-import { useQuery } from "@tanstack/react-query";
+import { MessagesTab } from "@/components/MessagesTab";
 
 interface Message {
   id: number;
   content: string;
   author: string;
-  votes: number;
   timestamp: Date;
 }
 
@@ -22,13 +21,23 @@ const Index = () => {
   const [participants, setParticipants] = useState<string[]>([]);
   const [winner, setWinner] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [authorName, setAuthorName] = useState("");
 
-  const { data: apiParticipants } = useQuery({
-    queryKey: ["participants"],
-    queryFn: fetchParticipants,
-  });
+  const handleAddMessage = (author: string, content: string) => {
+    if (!content.trim() || !author.trim()) {
+      toast.error("Por favor, preencha todos os campos!");
+      return;
+    }
+
+    const newMessage = {
+      id: Date.now(),
+      content: content.trim(),
+      author: author.trim(),
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [newMessage, ...prev]);
+    toast.success("Mensagem postada com sucesso!");
+  };
 
   const handleAddParticipant = (name: string) => {
     if (participants.includes(name)) {
@@ -62,34 +71,6 @@ const Index = () => {
     toast.success("Sorteio reiniciado!");
   };
 
-  const handleAddMessage = () => {
-    if (!newMessage.trim() || !authorName.trim()) {
-      toast.error("Por favor, preencha a mensagem e seu nome!");
-      return;
-    }
-
-    const message: Message = {
-      id: Date.now(),
-      content: newMessage.trim(),
-      author: authorName.trim(),
-      votes: 0,
-      timestamp: new Date(),
-    };
-
-    setMessages([message, ...messages]);
-    setNewMessage("");
-    toast.success("Mensagem adicionada com sucesso!");
-  };
-
-  const handleVote = (messageId: number) => {
-    setMessages(messages.map(msg => 
-      msg.id === messageId 
-        ? { ...msg, votes: msg.votes + 1 }
-        : msg
-    ));
-    toast.success("Voto registrado!");
-  };
-
   return (
     <div className="min-h-screen bg-white">
       <div className="container py-12 px-4">
@@ -100,6 +81,7 @@ const Index = () => {
             <TabsList className="w-full justify-start mb-6">
               <TabsTrigger value="sorteio">Sorteio</TabsTrigger>
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="mural">Mural de Recados</TabsTrigger>
             </TabsList>
             
             <TabsContent value="sorteio">
@@ -111,17 +93,9 @@ const Index = () => {
                   onRaffle={handleRaffle}
                   onReset={handleReset}
                 />
-                <ActivityCard />
+                <ActivityCard onAddMessage={handleAddMessage} />
                 <CoffeeCard />
-                <MessageBoard
-                  messages={messages}
-                  newMessage={newMessage}
-                  authorName={authorName}
-                  onMessageChange={setNewMessage}
-                  onAuthorChange={setAuthorName}
-                  onAddMessage={handleAddMessage}
-                  onVote={handleVote}
-                />
+                <MessageBoard messages={messages} />
                 <PhotoGallery />
               </div>
             </TabsContent>
@@ -129,21 +103,15 @@ const Index = () => {
             <TabsContent value="dashboard">
               <DashboardTab />
             </TabsContent>
+
+            <TabsContent value="mural">
+              <MessagesTab messages={messages} />
+            </TabsContent>
           </Tabs>
         </div>
       </div>
     </div>
   );
-};
-
-const fetchParticipants = async () => {
-  const response = await fetch(
-    "https://gbrvjrsrb1.execute-api.us-east-1.amazonaws.com/geDropsTech"
-  );
-  if (!response.ok) {
-    throw new Error("Falha ao carregar participantes");
-  }
-  return response.json();
 };
 
 export default Index;
