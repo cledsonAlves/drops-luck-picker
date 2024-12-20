@@ -19,7 +19,7 @@ interface Message {
 }
 
 const GITHUB_ISSUE_URL = "https://api.github.com/repos/cledsonAlves/drops-luck-picker/issues";
-const GITHUB_TOKEN = "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";
+const GITHUB_TOKEN = "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";
 
 const Index = () => {
   const [participants, setParticipants] = useState<string[]>([]);
@@ -35,15 +35,24 @@ const Index = () => {
       // First try to fetch the existing issue
       const response = await fetch(`${GITHUB_ISSUE_URL}/1`, {
         headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Authorization": `token ${GITHUB_TOKEN}`,
           "Accept": "application/vnd.github.v3+json"
         }
       });
+
+      if (response.status === 401) {
+        toast.error("Erro de autenticação com o GitHub. Verifique o token de acesso.");
+        return;
+      }
 
       if (response.status === 404) {
         // If issue doesn't exist, create it
         await createInitialIssue();
         return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.status}`);
       }
 
       const issue = await response.json();
@@ -60,7 +69,7 @@ const Index = () => {
       const response = await fetch(GITHUB_ISSUE_URL, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Authorization": `token ${GITHUB_TOKEN}`,
           "Accept": "application/vnd.github.v3+json",
           "Content-Type": "application/json",
         },
@@ -69,6 +78,11 @@ const Index = () => {
           body: initialBody,
         }),
       });
+
+      if (response.status === 401) {
+        toast.error("Erro de autenticação com o GitHub. Verifique o token de acesso.");
+        return;
+      }
 
       if (!response.ok) {
         throw new Error("Failed to create initial issue");
@@ -108,7 +122,7 @@ const Index = () => {
       const response = await fetch(`${GITHUB_ISSUE_URL}/1`, {
         method: "PATCH",
         headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Authorization": `token ${GITHUB_TOKEN}`,
           "Accept": "application/vnd.github.v3+json",
           "Content-Type": "application/json",
         },
@@ -116,6 +130,11 @@ const Index = () => {
           body: newBody,
         }),
       });
+
+      if (response.status === 401) {
+        toast.error("Erro de autenticação com o GitHub. Verifique o token de acesso.");
+        return;
+      }
 
       if (!response.ok) {
         throw new Error("Failed to update GitHub issue");
