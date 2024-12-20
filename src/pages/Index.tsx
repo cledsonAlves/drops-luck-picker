@@ -38,7 +38,9 @@ const Index = () => {
     }
     
     const randomIndex = Math.floor(Math.random() * participants.length);
-    setWinner(participants[randomIndex]);
+    const selectedWinner = participants[randomIndex];
+    setWinner(selectedWinner);
+    toast.success(`${selectedWinner} foi sorteado(a)!`);
   };
 
   const handleReset = () => {
@@ -76,7 +78,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-aws-50 to-aws-100">
+    <div className="min-h-screen bg-white">
       <div className="container py-12 px-4">
         <div className="max-w-6xl mx-auto space-y-12">
           <Header />
