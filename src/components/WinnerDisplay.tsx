@@ -8,14 +8,25 @@ interface WinnerDisplayProps {
   onRaffle: () => void;
   onReset: () => void;
   disabled: boolean;
+  selectedPrize?: string;
 }
 
-export const WinnerDisplay = ({ winner, onRaffle, onReset, disabled }: WinnerDisplayProps) => {
+export const WinnerDisplay = ({ 
+  winner, 
+  onRaffle, 
+  onReset, 
+  disabled,
+  selectedPrize 
+}: WinnerDisplayProps) => {
   const [isRaffling, setIsRaffling] = useState(false);
 
   const handleRaffle = async () => {
+    if (!selectedPrize) {
+      toast.error("Por favor, selecione um prêmio antes de sortear!");
+      return;
+    }
+    
     setIsRaffling(true);
-    // Simulate raffle animation time
     await new Promise(resolve => setTimeout(resolve, 2000));
     await onRaffle();
     setIsRaffling(false);
@@ -42,7 +53,9 @@ export const WinnerDisplay = ({ winner, onRaffle, onReset, disabled }: WinnerDis
               exit={{ opacity: 0, y: -20 }}
               className="text-center"
             >
-              <div className="text-sm text-aws-500 mb-2">Vencedor</div>
+              <div className="text-sm text-aws-500 mb-2">
+                Vencedor{selectedPrize ? ` - ${selectedPrize}` : ''}
+              </div>
               <motion.div 
                 className="text-3xl font-bold text-aws-800 bg-white/90 backdrop-blur-sm py-4 px-8 rounded-lg border border-aws-200"
                 initial={{ scale: 0.8 }}
@@ -59,7 +72,7 @@ export const WinnerDisplay = ({ winner, onRaffle, onReset, disabled }: WinnerDis
       <div className="flex gap-2 justify-center">
         <Button
           onClick={handleRaffle}
-          disabled={isRaffling}
+          disabled={isRaffling || disabled || !selectedPrize}
           className="bg-aws-600 hover:bg-aws-700 transition-colors"
         >
           {isRaffling ? (

@@ -4,6 +4,7 @@ import { RaffleInput } from "./RaffleInput";
 import { WinnerDisplay } from "./WinnerDisplay";
 import { ParticipantsList } from "./ParticipantsList";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 interface RaffleCardProps {
   participants: string[];
@@ -30,6 +31,7 @@ export const RaffleCard = ({
   onRaffle,
   onReset,
 }: RaffleCardProps) => {
+  const [selectedPrize, setSelectedPrize] = useState<string>("");
   const { data: apiParticipants } = useQuery({
     queryKey: ["participants"],
     queryFn: fetchParticipants,
@@ -55,10 +57,12 @@ export const RaffleCard = ({
           onRaffle={onRaffle}
           onReset={onReset}
           disabled={allParticipants.length < 2}
+          selectedPrize={selectedPrize}
         />
         <ParticipantsList 
           participants={localParticipants}
           onAddParticipant={onAddParticipant}
+          onPrizeSelect={setSelectedPrize}
         />
       </CardContent>
     </Card>

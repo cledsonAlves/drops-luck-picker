@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { RegisterDialog } from "./RegisterDialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 interface Participant {
@@ -14,7 +14,14 @@ interface Participant {
 interface ParticipantsListProps {
   participants: string[];
   onAddParticipant: (name: string) => void;
+  onPrizeSelect?: (prize: string) => void;
 }
+
+const AVAILABLE_PRIZES = [
+  { id: "camiseta", label: "Camiseta AWS" },
+  { id: "caneca", label: "Caneca AWS" },
+  { id: "livro", label: "Livro Cloud Computing" },
+];
 
 const fetchParticipants = async (): Promise<Participant[]> => {
   const response = await fetch(
@@ -29,6 +36,7 @@ const fetchParticipants = async (): Promise<Participant[]> => {
 export const ParticipantsList = ({
   participants: localParticipants,
   onAddParticipant,
+  onPrizeSelect,
 }: ParticipantsListProps) => {
   const { data: apiParticipants, isError } = useQuery({
     queryKey: ["participants"],
@@ -44,17 +52,33 @@ export const ParticipantsList = ({
     ...(apiParticipants?.map((p) => p.name.S || "Sem nome") || []),
   ];
 
+  const handlePrizeChange = (value: string) => {
+    onPrizeSelect?.(value);
+    toast.success(`Prêmio selecionado: ${AVAILABLE_PRIZES.find(p => p.id === value)?.label}`);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold">Participantes ({allParticipants.length})</h2>
-        <RegisterDialog onRegister={onAddParticipant} />
+        <Select onValueChange={handlePrizeChange}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Selecione o prêmio" />
+          </SelectTrigger>
+          <SelectContent>
+            {AVAILABLE_PRIZES.map((prize) => (
+              <SelectItem key={prize.id} value={prize.id}>
+                {prize.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <ul className="space-y-2">
         {allParticipants.map((participant, index) => (
           <li
             key={index}
-            className="p-2 bg-white rounded shadow hover:shadow-md transition-shadow"
+            className="p-2 bg-white rounded shadow hover:shadow-md transition-shadow animate-participant-enter"
           >
             {participant}
           </li>
