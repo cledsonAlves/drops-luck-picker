@@ -19,6 +19,7 @@ interface Message {
 }
 
 const GITHUB_ISSUE_URL = "https://api.github.com/repos/cledsonAlves/drops-luck-picker/issues/1";
+const GITHUB_TOKEN = "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";
 
 const Index = () => {
   const [participants, setParticipants] = useState<string[]>([]);
@@ -31,12 +32,17 @@ const Index = () => {
 
   const fetchMessages = async () => {
     try {
-      const response = await fetch(GITHUB_ISSUE_URL);
+      const response = await fetch(GITHUB_ISSUE_URL, {
+        headers: {
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github.v3+json"
+        }
+      });
       const issue = await response.json();
       
       // Parse messages from issue body
       const messageRegex = /\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(\d+)\s*\|/g;
-      const matches = [...issue.body.matchAll(messageRegex)];
+      const matches = [...(issue.body?.matchAll(messageRegex) || [])];
       
       const parsedMessages: Message[] = matches.map((match) => ({
         id: parseInt(match[1]),
@@ -65,7 +71,8 @@ const Index = () => {
       const response = await fetch(GITHUB_ISSUE_URL, {
         method: "PATCH",
         headers: {
-          "Authorization": `Bearer ${process.env.GITHUB_TOKEN}`,
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github.v3+json",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
