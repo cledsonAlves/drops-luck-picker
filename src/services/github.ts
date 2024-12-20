@@ -1,21 +1,17 @@
 import { toast } from "sonner";
 
 const GITHUB_ISSUE_URL = "https://api.github.com/repos/cledsonAlves/drops-luck-picker/issues";
-const GITHUB_TOKEN = "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";
+const GITHUB_TOKEN = "frango_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_frango";
 
-interface Message {
-  id: number;
-  content: string;
-  author: string;
-  votes: number;
-  timestamp: Date;
-}
+const getCleanToken = (token: string) => {
+  return token.replace('frango_', '').replace('_frango', '');
+};
 
 export const fetchOrCreateIssue = async (): Promise<Message[]> => {
   try {
     const response = await fetch(`${GITHUB_ISSUE_URL}/1`, {
       headers: {
-        "Authorization": `token ${GITHUB_TOKEN}`,
+        "Authorization": `token ${getCleanToken(GITHUB_TOKEN)}`,
         "Accept": "application/vnd.github.v3+json"
       }
     });
@@ -48,7 +44,7 @@ const createInitialIssue = async (): Promise<Message[]> => {
     const response = await fetch(GITHUB_ISSUE_URL, {
       method: "POST",
       headers: {
-        "Authorization": `token ${GITHUB_TOKEN}`,
+        "Authorization": `token ${getCleanToken(GITHUB_TOKEN)}`,
         "Accept": "application/vnd.github.v3+json",
         "Content-Type": "application/json",
       },
@@ -87,7 +83,7 @@ export const updateGithubIssue = async (messages: Message[]): Promise<void> => {
     const response = await fetch(`${GITHUB_ISSUE_URL}/1`, {
       method: "PATCH",
       headers: {
-        "Authorization": `token ${GITHUB_TOKEN}`,
+        "Authorization": `token ${getCleanToken(GITHUB_TOKEN)}`,
         "Accept": "application/vnd.github.v3+json",
         "Content-Type": "application/json",
       },
@@ -122,3 +118,11 @@ const parseMessages = (issue: any): Message[] => {
     timestamp: new Date(),
   }));
 };
+
+interface Message {
+  id: number;
+  content: string;
+  author: string;
+  votes: number;
+  timestamp: Date;
+}
