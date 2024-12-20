@@ -16,7 +16,7 @@ export const CoffeeCard = () => {
             Pausa para um café especial com o time!
           </p>
           <ul className="list-disc list-inside text-aws-600 space-y-2">
-            <li>Café da manhã especial</li>
+            <li>Café especial</li>
             <li>Networking descontraído</li>
             <li>Momento de integração</li>
           </ul>
