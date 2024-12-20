@@ -24,11 +24,11 @@ export const RaffleInput = ({ onAddParticipant }: RaffleInputProps) => {
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Digite o nome do participante"
-        className="bg-white/80 backdrop-blur-sm border-raffle-200"
+        className="bg-white/80 backdrop-blur-sm border-aws-200"
       />
       <Button 
         type="submit" 
-        className="bg-raffle-700 hover:bg-raffle-800 transition-colors"
+        className="bg-aws-600 hover:bg-aws-700 transition-colors"
       >
         Adicionar
       </Button>
