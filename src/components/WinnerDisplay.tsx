@@ -33,7 +33,7 @@ export const WinnerDisplay = ({ winner, onRaffle, onReset, disabled }: WinnerDis
               className="flex flex-col items-center gap-2"
             >
               <Loader2 className="h-8 w-8 animate-spin text-aws-600" />
-              <span className="text-aws-600 font-medium">Sorteando...</span>
+              <span className="text-aws-600 font-medium">Sorteando o Digital Lover's...</span>
             </motion.div>
           ) : winner ? (
             <motion.div
