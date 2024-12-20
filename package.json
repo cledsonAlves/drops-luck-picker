@@ -8,7 +8,8 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "aws s3 sync ./dist s3://dropstech --delete"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
