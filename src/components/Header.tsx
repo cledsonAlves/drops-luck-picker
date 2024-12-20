@@ -17,7 +17,7 @@ export const Header = () => {
         </div>
       </div>
       <h1 className="text-4xl font-bold text-aws-800">
-        Confraternização Drops Tech
+        Confraternização Drops Tech Final de Ano
       </h1>
       <p className="text-aws-600">
         NTTDATA - Time da Drops Tech
