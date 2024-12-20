@@ -6,6 +6,8 @@ import { ActivityCard } from "@/components/ActivityCard";
 import { CoffeeCard } from "@/components/CoffeeCard";
 import { MessageBoard } from "@/components/MessageBoard";
 import { PhotoGallery } from "@/components/PhotoGallery";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import DashboardTab from "@/components/DashboardTab";
 import { useQuery } from "@tanstack/react-query";
 
 interface Message {
@@ -15,16 +17,6 @@ interface Message {
   votes: number;
   timestamp: Date;
 }
-
-const fetchParticipants = async () => {
-  const response = await fetch(
-    "https://gbrvjrsrb1.execute-api.us-east-1.amazonaws.com/geDropsTech"
-  );
-  if (!response.ok) {
-    throw new Error("Falha ao carregar participantes");
-  }
-  return response.json();
-};
 
 const Index = () => {
   const [participants, setParticipants] = useState<string[]>([]);
@@ -104,31 +96,54 @@ const Index = () => {
         <div className="max-w-6xl mx-auto space-y-12">
           <Header />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <RaffleCard
-              participants={participants}
-              winner={winner}
-              onAddParticipant={handleAddParticipant}
-              onRaffle={handleRaffle}
-              onReset={handleReset}
-            />
-            <ActivityCard />
-            <CoffeeCard />
-            <MessageBoard
-              messages={messages}
-              newMessage={newMessage}
-              authorName={authorName}
-              onMessageChange={setNewMessage}
-              onAuthorChange={setAuthorName}
-              onAddMessage={handleAddMessage}
-              onVote={handleVote}
-            />
-            <PhotoGallery />
-          </div>
+          <Tabs defaultValue="sorteio" className="w-full">
+            <TabsList className="w-full justify-start mb-6">
+              <TabsTrigger value="sorteio">Sorteio</TabsTrigger>
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="sorteio">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <RaffleCard
+                  participants={participants}
+                  winner={winner}
+                  onAddParticipant={handleAddParticipant}
+                  onRaffle={handleRaffle}
+                  onReset={handleReset}
+                />
+                <ActivityCard />
+                <CoffeeCard />
+                <MessageBoard
+                  messages={messages}
+                  newMessage={newMessage}
+                  authorName={authorName}
+                  onMessageChange={setNewMessage}
+                  onAuthorChange={setAuthorName}
+                  onAddMessage={handleAddMessage}
+                  onVote={handleVote}
+                />
+                <PhotoGallery />
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="dashboard">
+              <DashboardTab />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
   );
+};
+
+const fetchParticipants = async () => {
+  const response = await fetch(
+    "https://gbrvjrsrb1.execute-api.us-east-1.amazonaws.com/geDropsTech"
+  );
+  if (!response.ok) {
+    throw new Error("Falha ao carregar participantes");
+  }
+  return response.json();
 };
 
 export default Index;
