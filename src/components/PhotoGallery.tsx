@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Camera, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface Photo {
   id: number;
@@ -29,13 +30,25 @@ export const PhotoGallery = () => {
       author: "Maria",
       timestamp: new Date(),
     },
+    {
+      id: 3,
+      url: "/placeholder.svg",
+      caption: "AWS Community Day",
+      author: "Pedro",
+      timestamp: new Date(),
+    },
+    {
+      id: 4,
+      url: "/placeholder.svg",
+      caption: "StackSpot Meetup",
+      author: "Ana",
+      timestamp: new Date(),
+    },
   ]);
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // In a real application, you would upload the file to a server
-      // For now, we'll just create a local URL
       const newPhoto: Photo = {
         id: photos.length + 1,
         url: URL.createObjectURL(file),
@@ -53,7 +66,7 @@ export const PhotoGallery = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-aws-800">
           <Camera className="h-6 w-6" />
-          Galeria de Fotos
+          Mural de Fotos
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -75,22 +88,21 @@ export const PhotoGallery = () => {
             />
           </label>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {photos.map((photo) => (
             <div
               key={photo.id}
-              className="relative group overflow-hidden rounded-lg shadow-md transition-transform hover:scale-105"
+              className="flex flex-col items-center gap-3 group animate-participant-enter"
             >
-              <img
-                src={photo.url}
-                alt={photo.caption}
-                className="w-full h-48 object-cover"
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-aws-800/90 to-transparent p-4">
-                <p className="text-white font-medium">{photo.caption}</p>
-                <p className="text-aws-100 text-sm">
-                  Por {photo.author} • {photo.timestamp.toLocaleDateString()}
-                </p>
+              <Avatar className="w-24 h-24 border-4 border-aws-100 shadow-lg transition-transform group-hover:scale-105">
+                <AvatarImage src={photo.url} alt={photo.author} />
+                <AvatarFallback className="bg-aws-200 text-aws-800 text-xl">
+                  {photo.author.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-center">
+                <h3 className="font-medium text-aws-800">{photo.author}</h3>
+                <p className="text-sm text-aws-600">{photo.caption}</p>
               </div>
             </div>
           ))}
