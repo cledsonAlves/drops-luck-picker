@@ -35,7 +35,10 @@ export const RaffleCard = ({
           onReset={onReset}
           disabled={participants.length < 2}
         />
-        <ParticipantsList participants={participants} />
+        <ParticipantsList 
+          participants={participants}
+          onAddParticipant={onAddParticipant}
+        />
       </CardContent>
     </Card>
   );
