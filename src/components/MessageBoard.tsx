@@ -24,9 +24,7 @@ interface MessageBoardProps {
 export const MessageBoard = ({
   messages,
   newMessage,
-  authorName,
   onMessageChange,
-  onAuthorChange,
   onAddMessage,
   onVote,
 }: MessageBoardProps) => {
@@ -41,13 +39,6 @@ export const MessageBoard = ({
       <CardContent>
         <div className="space-y-6">
           <div className="space-y-4">
-            <input
-              type="text"
-              placeholder="Seu nome"
-              value={authorName}
-              onChange={(e) => onAuthorChange(e.target.value)}
-              className="w-full px-4 py-2 rounded-md border border-aws-200 focus:outline-none focus:ring-2 focus:ring-aws-500"
-            />
             <Textarea
               placeholder="Deixe sua mensagem, compartilhe suas memórias de 2024..."
               value={newMessage}
