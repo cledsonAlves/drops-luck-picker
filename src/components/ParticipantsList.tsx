@@ -43,7 +43,7 @@ export const ParticipantsList = ({ participants: localParticipants }: Participan
 
   const allParticipants = [
     ...localParticipants,
-    ...(apiParticipants?.map(p => p.email.S) || [])
+    ...(apiParticipants?.map(p => p.name.S || 'Sem nome') || [])
   ];
 
   return (
