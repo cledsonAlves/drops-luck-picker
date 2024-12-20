@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 
 const GITHUB_ISSUE_URL = "https://api.github.com/repos/cledsonAlves/drops-luck-picker/issues";
-const GITHUB_TOKEN = "frango_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_frango";
+const GITHUB_TOKEN = "frango_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_frango";
 
 const getCleanToken = (token: string) => {
   return token.replace('frango_', '').replace('_frango', '');
