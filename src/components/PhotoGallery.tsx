@@ -25,7 +25,7 @@ export const PhotoGallery = () => {
     {
       id: 2,
       url: "/placeholder.svg",
-      caption: "Retrospectiva 2023",
+      caption: "Retrospectiva 2024",
       author: "Maria",
       timestamp: new Date(),
     },

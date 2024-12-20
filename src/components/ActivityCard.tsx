@@ -13,7 +13,7 @@ export const ActivityCard = () => {
       <CardContent>
         <div className="space-y-4">
           <p className="text-aws-700">
-            Compartilhe suas melhores memórias de 2023 com o time!
+            Compartilhe suas melhores memórias de 2024 com o time!
           </p>
           <ul className="list-disc list-inside text-aws-600 space-y-2">
             <li>Momentos marcantes</li>
