@@ -5,6 +5,7 @@ import { RaffleCard } from "@/components/RaffleCard";
 import { ActivityCard } from "@/components/ActivityCard";
 import { CoffeeCard } from "@/components/CoffeeCard";
 import { MessageBoard } from "@/components/MessageBoard";
+import { PhotoGallery } from "@/components/PhotoGallery";
 
 interface Message {
   id: number;
@@ -99,6 +100,7 @@ const Index = () => {
               onAddMessage={handleAddMessage}
               onVote={handleVote}
             />
+            <PhotoGallery />
           </div>
         </div>
       </div>
