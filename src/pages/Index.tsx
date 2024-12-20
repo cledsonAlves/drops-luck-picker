@@ -9,6 +9,7 @@ import { PhotoGallery } from "@/components/PhotoGallery";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardTab from "@/components/DashboardTab";
 import { MessagesTab } from "@/components/MessagesTab";
+import { fetchOrCreateIssue, updateGithubIssue } from "@/services/github";
 
 interface Message {
   id: number;
@@ -18,132 +19,18 @@ interface Message {
   timestamp: Date;
 }
 
-const GITHUB_ISSUE_URL = "https://api.github.com/repos/cledsonAlves/drops-luck-picker/issues";
-const GITHUB_TOKEN = "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";
-
 const Index = () => {
   const [participants, setParticipants] = useState<string[]>([]);
   const [winner, setWinner] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
-    fetchOrCreateIssue();
+    const loadMessages = async () => {
+      const fetchedMessages = await fetchOrCreateIssue();
+      setMessages(fetchedMessages);
+    };
+    loadMessages();
   }, []);
-
-  const fetchOrCreateIssue = async () => {
-    try {
-      // First try to fetch the existing issue
-      const response = await fetch(`${GITHUB_ISSUE_URL}/1`, {
-        headers: {
-          "Authorization": `token ${GITHUB_TOKEN}`,
-          "Accept": "application/vnd.github.v3+json"
-        }
-      });
-
-      if (response.status === 401) {
-        toast.error("Erro de autenticação com o GitHub. Verifique o token de acesso.");
-        return;
-      }
-
-      if (response.status === 404) {
-        // If issue doesn't exist, create it
-        await createInitialIssue();
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(`GitHub API error: ${response.status}`);
-      }
-
-      const issue = await response.json();
-      parseAndSetMessages(issue);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-      toast.error("Erro ao carregar as mensagens");
-    }
-  };
-
-  const createInitialIssue = async () => {
-    try {
-      const initialBody = "| ID | Autor | Mensagem | Votos |\n|---|---|---|---|\n";
-      const response = await fetch(GITHUB_ISSUE_URL, {
-        method: "POST",
-        headers: {
-          "Authorization": `token ${GITHUB_TOKEN}`,
-          "Accept": "application/vnd.github.v3+json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: "Mural de Recados",
-          body: initialBody,
-        }),
-      });
-
-      if (response.status === 401) {
-        toast.error("Erro de autenticação com o GitHub. Verifique o token de acesso.");
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error("Failed to create initial issue");
-      }
-
-      const issue = await response.json();
-      parseAndSetMessages(issue);
-    } catch (error) {
-      console.error("Error creating initial issue:", error);
-      toast.error("Erro ao criar o mural de recados");
-    }
-  };
-
-  const parseAndSetMessages = (issue: any) => {
-    const messageRegex = /\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(\d+)\s*\|/g;
-    const matches = [...(issue.body?.matchAll(messageRegex) || [])];
-    
-    const parsedMessages: Message[] = matches.map((match) => ({
-      id: parseInt(match[1]),
-      author: match[2],
-      content: match[3],
-      votes: parseInt(match[4]),
-      timestamp: new Date(),
-    }));
-
-    setMessages(parsedMessages);
-  };
-
-  const updateGithubIssue = async (newMessages: Message[]) => {
-    try {
-      const tableHeader = "| ID | Autor | Mensagem | Votos |\n|---|---|---|---|\n";
-      const tableRows = newMessages
-        .map((msg) => `| ${msg.id} | ${msg.author} | ${msg.content} | ${msg.votes} |`)
-        .join("\n");
-      const newBody = tableHeader + tableRows;
-
-      const response = await fetch(`${GITHUB_ISSUE_URL}/1`, {
-        method: "PATCH",
-        headers: {
-          "Authorization": `token ${GITHUB_TOKEN}`,
-          "Accept": "application/vnd.github.v3+json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          body: newBody,
-        }),
-      });
-
-      if (response.status === 401) {
-        toast.error("Erro de autenticação com o GitHub. Verifique o token de acesso.");
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error("Failed to update GitHub issue");
-      }
-    } catch (error) {
-      console.error("Error updating GitHub issue:", error);
-      toast.error("Erro ao salvar a mensagem");
-    }
-  };
 
   const handleAddMessage = (author: string, content: string) => {
     if (!content.trim() || !author.trim()) {
