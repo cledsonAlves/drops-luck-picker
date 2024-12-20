@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { RaffleCard } from "@/components/RaffleCard";
@@ -14,13 +14,73 @@ interface Message {
   id: number;
   content: string;
   author: string;
+  votes: number;
   timestamp: Date;
 }
+
+const GITHUB_ISSUE_URL = "https://api.github.com/repos/cledsonAlves/drops-luck-picker/issues/1";
 
 const Index = () => {
   const [participants, setParticipants] = useState<string[]>([]);
   const [winner, setWinner] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    fetchMessages();
+  }, []);
+
+  const fetchMessages = async () => {
+    try {
+      const response = await fetch(GITHUB_ISSUE_URL);
+      const issue = await response.json();
+      
+      // Parse messages from issue body
+      const messageRegex = /\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(\d+)\s*\|/g;
+      const matches = [...issue.body.matchAll(messageRegex)];
+      
+      const parsedMessages: Message[] = matches.map((match) => ({
+        id: parseInt(match[1]),
+        author: match[2],
+        content: match[3],
+        votes: parseInt(match[4]),
+        timestamp: new Date(),
+      }));
+
+      setMessages(parsedMessages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      toast.error("Erro ao carregar as mensagens");
+    }
+  };
+
+  const updateGithubIssue = async (newMessages: Message[]) => {
+    try {
+      // Format messages as markdown table
+      const tableHeader = "| ID | Autor | Mensagem | Votos |\n|---|---|---|---|\n";
+      const tableRows = newMessages
+        .map((msg) => `| ${msg.id} | ${msg.author} | ${msg.content} | ${msg.votes} |`)
+        .join("\n");
+      const newBody = tableHeader + tableRows;
+
+      const response = await fetch(GITHUB_ISSUE_URL, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${process.env.GITHUB_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          body: newBody,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update GitHub issue");
+      }
+    } catch (error) {
+      console.error("Error updating GitHub issue:", error);
+      toast.error("Erro ao salvar a mensagem");
+    }
+  };
 
   const handleAddMessage = (author: string, content: string) => {
     if (!content.trim() || !author.trim()) {
@@ -32,10 +92,13 @@ const Index = () => {
       id: Date.now(),
       content: content.trim(),
       author: author.trim(),
+      votes: 0,
       timestamp: new Date(),
     };
 
-    setMessages(prev => [newMessage, ...prev]);
+    const updatedMessages = [newMessage, ...messages];
+    setMessages(updatedMessages);
+    updateGithubIssue(updatedMessages);
     toast.success("Mensagem postada com sucesso!");
   };
 
@@ -49,18 +112,13 @@ const Index = () => {
   };
 
   const handleRaffle = () => {
-    const allParticipants = [
-      ...participants,
-      ...(apiParticipants?.map((p) => p.name.S) || []),
-    ];
-
-    if (allParticipants.length < 2) {
+    if (participants.length < 2) {
       toast.error("Adicione pelo menos 2 participantes para realizar o sorteio!");
       return;
     }
     
-    const randomIndex = Math.floor(Math.random() * allParticipants.length);
-    const selectedWinner = allParticipants[randomIndex];
+    const randomIndex = Math.floor(Math.random() * participants.length);
+    const selectedWinner = participants[randomIndex];
     setWinner(selectedWinner);
     toast.success(`${selectedWinner} foi sorteado(a)!`);
   };
@@ -69,6 +127,14 @@ const Index = () => {
     setParticipants([]);
     setWinner(null);
     toast.success("Sorteio reiniciado!");
+  };
+
+  const handleVote = (messageId: number) => {
+    const updatedMessages = messages.map((msg) =>
+      msg.id === messageId ? { ...msg, votes: msg.votes + 1 } : msg
+    );
+    setMessages(updatedMessages);
+    updateGithubIssue(updatedMessages);
   };
 
   return (
@@ -95,7 +161,15 @@ const Index = () => {
                 />
                 <ActivityCard onAddMessage={handleAddMessage} />
                 <CoffeeCard />
-                <MessageBoard messages={messages} />
+                <MessageBoard 
+                  messages={messages}
+                  newMessage=""
+                  authorName=""
+                  onMessageChange={() => {}}
+                  onAuthorChange={() => {}}
+                  onAddMessage={() => {}}
+                  onVote={handleVote}
+                />
                 <PhotoGallery />
               </div>
             </TabsContent>
