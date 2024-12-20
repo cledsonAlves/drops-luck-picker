@@ -19,7 +19,7 @@ interface Message {
 }
 
 const GITHUB_ISSUE_URL = "https://api.github.com/repos/cledsonAlves/drops-luck-picker/issues";
-const GITHUB_TOKEN = "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";
+const GITHUB_TOKEN = "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";
 
 const Index = () => {
   const [participants, setParticipants] = useState<string[]>([]);
